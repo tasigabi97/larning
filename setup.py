@@ -15,9 +15,8 @@ with open("README.md", "r") as fh:
 
 MAJOR = 0
 MINOR = 0
-MICRO = 0
+MICRO = 1
 VERSION = f"{MAJOR}.{MINOR}.{MICRO}"
-
 setup(
   name='larning',
   version=VERSION,
@@ -37,9 +36,11 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    install_requires=["twine", "black", "pytest"],
+    install_requires=["twine", "black", "pytest","wheel"],
     keywords=['larning', ],
     license='MIT',
 
 )
+print(find_packages())
+
 
