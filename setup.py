@@ -17,7 +17,7 @@ dist_path = join(root_path, "dist")
 egg_info_path = join(root_path, package_name + ".egg-info")
 build_path = join(root_path, "build")
 # funcs
-def current_pypi_release():
+def current_pypi_release() -> str:
     with urlopen("https://pypi.org/pypi/" + package_name + "/json") as url:
         data: dict = loads(url.read().decode())
         releases: dict = data["releases"]
@@ -25,11 +25,11 @@ def current_pypi_release():
         return release_strs[-1]
 
 
-def release_to_ints(release: str):
+def release_to_ints(release: str) -> List[int]:
     return [int(i) for i in split("\.", release)]
 
 
-def increase_ints(ints: List[int]):
+def increase_ints(ints: List[int]) -> List[int]:
     ints[-1] += 1
     return ints
 
