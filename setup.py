@@ -45,7 +45,7 @@ def to_release(ints: List[int], splitter: str = ".") -> str:
 
 # ˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇ
 release = to_release([0, 0, 0])
-install_requires = ["twine", "setuptools", "black", "pytest", "wheel"]
+install_requires = ["twine", "pydantic", "setuptools", "black", "pytest", "wheel"]
 author = "Tasnádi Gábor"
 email = "tasi.gabi97@gmail.com"
 github_username = "tasigabi97"
