@@ -1,28 +1,70 @@
 from collections.abc import Callable
+from abc import ABC, abstractmethod, abstractproperty
 from pydantic import validate_arguments
 from typing import Iterable
-from os import system
 from larning.strings_i import concatenate_with_separation
-from subprocess import check_output,STDOUT,run,CompletedProcess
-from os import environ
+from subprocess import check_output, STDOUT, run, CompletedProcess
+from os import environ, system, chdir, getcwd
+from os.path import exists, normpath, isabs, expandvars
 from larning.property import with_property
 
-@with_property("exit_code","stdout","stderr")
-class Bash(Callable):
+
+@with_property("exit_code", "stdout", "stderr")
+class Proc(Callable):
+    @property
+    def _command(self) -> str:
+        return concatenate_with_separation(self._args, " ")
+
     @validate_arguments
-    def __init__(self, *args: str,shell=False,env=None):
-        self._env,self._shell=env,shell
-        self._args= concatenate_with_separation(args, " ") if shell else [environ[arg[1:]] if arg[0] == "$" else arg for arg in args]
+    def __init__(self, *args: str, wd_path: str = None, shell=False, env=None):
+        self._shell, self._env, = shell, env
+        self._args = [expandvars(arg) for arg in args]
+        self._wd = Directory(getcwd()) if wd_path is None else Directory(wd_path)
 
-    def __str__(self):
-        return self._args if self._shell else concatenate_with_separation(self._args, " ")
+    def __str__(self) -> str:
+        return concatenate_with_separation([self._wd.path, self._command], "-> ")
 
-    def __call__(self):
-        p :CompletedProcess= run(self._args,capture_output=True,env=self._env,shell=self._shell)
-        self.stdout,self.stderr,self.exit_code=p.stdout.decode("ascii"),p.stderr.decode("ascii"),p.returncode
-        p.check_returncode()
+    def __call__(self) -> "Proc":
+        args = self._command if self._shell else self._args
+        with self._wd:
+            p: CompletedProcess = run(
+                args, capture_output=True, env=self._env, shell=self._shell
+            )
+            self.stdout, self.stderr, self.exit_code = (
+                p.stdout.decode("ascii"),
+                p.stderr.decode("ascii"),
+                p.returncode,
+            )
+            p.check_returncode()
         return self
 
 
+@with_property("path")
+class VirtualDiskComponent(ABC, Callable):
+    @validate_arguments
+    def __init__(self, path: str):
+        self.path = path
+
+    @abstractmethod
+    def __enter__(self):
+        ...
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        ...
+
+    @validate_arguments
+    def path_setter(self, path: str):
+        self._path = normpath(path)
 
 
+class Directory(VirtualDiskComponent):
+    def __call__(self):
+        chdir(self.path)
+
+    def __enter__(self):
+        self._past_path = getcwd()
+        chdir(self.path)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        chdir(self._past_path)

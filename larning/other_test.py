@@ -4,18 +4,6 @@ from pytest import raises
 from typing import Union, List, Tuple, Set, Sequence
 from typing import Iterable as typing_Iterable
 from typing import Iterator as typing_Iterator
-from collections.abc import Iterable as abc_Iterable
-from collections.abc import Iterator as abc_Iterator
-
-
-@name(abc_Iterable, 0, globals())
-def _():
-    ...
-
-
-@name(abc_Iterator, 0, globals())
-def _():
-    ...
 
 
 @name(validate_arguments, 0, globals())
