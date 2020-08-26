@@ -1,8 +1,8 @@
-from larning.testing import name
+from larning.testing import name, input_manager
 from pydantic import ValidationError
 from pytest import raises
 
-
+# name TESTˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇ
 def basic_func():
     return 0
 
@@ -112,3 +112,9 @@ def test_name():
     with raises(NameError):
         name(basic_class, "1", globals())(basic_func)
         name(basic_class, "1", globals())(basic_func)
+
+
+# name TEST^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+def test_input_manager():
+    with input_manager("a"):
+        assert input() == "a"

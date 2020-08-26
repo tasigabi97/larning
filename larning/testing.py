@@ -1,6 +1,9 @@
 from pydantic import validate_arguments
 from typing import Union, Callable
 from larning.strings import concatenate_with_separation
+from contextlib import contextmanager
+from io import StringIO
+import sys
 
 
 @validate_arguments
@@ -16,3 +19,11 @@ def name(tested: Callable, name: str, globals: dict):
         return func
 
     return decorator
+
+
+@contextmanager
+def input_manager(string: str) -> None:
+    original_stdin = sys.stdin
+    sys.stdin = StringIO(string + "\n")
+    yield
+    sys.stdin = original_stdin
