@@ -1,7 +1,12 @@
 from larning.testing import name, input_manager
-from larning.ci import TaskList, ProcExecuter, InputVariable, InputVariableFactory,Task,TaskFactory
+from larning.ci import InputVariable, Task, Script, ProcTask
 from pytest import raises
 from pydantic import ValidationError
+
+
+def setup_function(func):
+    Script.clear()
+    Task.clear()
 
 
 @name(InputVariable.__init__, 0, globals())
@@ -29,52 +34,103 @@ def _():
 @name(InputVariable.Factory, 0, globals())
 def _():
     InputVariable.clear()
+    InputVariableFactory = InputVariable.Factory()
     a = InputVariableFactory.a
     b = InputVariableFactory.b
     a2 = InputVariableFactory.a
     assert a is a2
     assert InputVariable._objects == {a, b}
 
+
 @name(Task.__str__, 0, globals())
 def _():
-    t=Task(lambda :1,(1,),{"a":"a"},name="name")
+    t = Task(lambda: 1, (1,), {"a": "a"}, name="name")
     assert str(t) == "name-><lambda>(1, a='a')"
+
 
 @name(Task.__str__, InputVariable.__name__, globals())
 def _():
-    name=InputVariable("name")
-    t=Task(lambda :1,(name,),name="name")
+    name = InputVariable("name")
+    t = Task(lambda: 1, (name,), name="name")
     assert str(t) == "name-><lambda>(<@name@>)"
     name._value = "a"
     assert str(t) == "name-><lambda>(a)"
 
+
 @name(Task.__call__, InputVariable.__name__, globals())
 def _():
-    t=Task((lambda x,y=None:x+y),[InputVariable("x")],{"y":InputVariable("y")},name="name")
+    t = Task(
+        (lambda x, y=None: x + y),
+        [InputVariable("x")],
+        {"y": InputVariable("y")},
+        name="name",
+    )
     with input_manager("x\ny"):
         assert t() == "xy"
     assert t() == "xy"
 
+
 @name(Task.Factory, 1, globals())
 def _():
-    TaskFactory.a=[lambda x:x,[1],{}]
-    assert TaskFactory.a.name == "a" and isinstance(TaskFactory.a ,Task) and TaskFactory.a() == 1
-    TaskFactory.b=[lambda :2]
+    TaskFactory = Task.Factory()
+    TaskFactory.a = [lambda x: x, [1], {}]
+    assert (
+        TaskFactory.a.name == "a"
+        and isinstance(TaskFactory.a, Task)
+        and TaskFactory.a() == 1
+    )
+    TaskFactory.b = [lambda: 2]
     assert TaskFactory.b.name == "b" and TaskFactory.b() == 2
 
 
-
-@name(TaskList.__init__, 0, globals())
+@name(ProcTask, 1, globals())
 def _():
-    with raises(ValidationError):
-        TaskList(1)
-    a = TaskList(lambda: 1, lambda: 2, name="name")
-    assert a.name == "name" and a() == [1, 2]
+    assert len(Task) == 0 == len(ProcTask)
+    Task(lambda: 1)
+    assert len(Task) == 1 and len(ProcTask) == 0
+    ProcTask(lambda: 1)
+    assert len(Task) == 2 and len(ProcTask) == 1
+
+    assert hasattr(ProcTask, "_objects")
 
 
-@name(ProcExecuter, 0, globals())
+@name(Script.__str__, 1, globals())
 def _():
-    print(ProcExecuter.CLASS)
-    ProcExecuter.CLASS = None
-    print(ProcExecuter.CLASS)
-    print(ProcExecuter().OBJECT)
+    assert "name:\n\t\t1-><lambda>()\n\t\t2-><lambda>()" == str(
+        Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name")
+    )
+
+
+@name(Script.__call__, 1, globals())
+def _():
+    with input_manager("\n\n"):
+        assert Script(
+            Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name"
+        )() == [1, 2]
+    with input_manager("\n1\n\n2\n"):
+        assert Script(
+            Task(lambda x: x, [InputVariable("1")], name="1"),
+            Task(lambda y=None: y, kwargs={"y": InputVariable("2")}, name="2"),
+            name="name",
+        )() == ["1", "2"]
+
+
+@name(Script.Factory.__enter__, 1, globals())
+def _():
+    with Script.Factory() as (iF, tF, sF):
+        assert (
+            isinstance(iF, InputVariable.Factory)
+            and isinstance(tF, Task.Factory)
+            and isinstance(sF, Script.Factory)
+        )
+
+
+@name(Script.Factory.__setattr__, 1, globals())
+def _():
+    sF = Script.Factory()
+    t = Task(lambda x: x, [1], name="name")
+    sF.a = [t]
+    assert len(Script) == 1 and isinstance(Script["a"], Script)
+    for i in Script:
+        for j in i:
+            assert j.name == "name" and j() == 1

@@ -34,3 +34,12 @@ class CollectorType(type):
 
     def clear(new_cls):
         new_cls._objects.clear()
+
+    def __getitem__(new_cls, item):
+        for i in new_cls:
+            if item == i:
+                return i
+        raise IndexError(f"object with index ({item}) not found")
+
+    def __len__(new_cls):
+        return len(new_cls._objects)

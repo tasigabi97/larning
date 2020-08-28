@@ -31,7 +31,7 @@ def with_property(*property_names: str) -> Callable:
                 else (lambda val_name: lambda self: delattr(self, val_name))(val_name)
             )
             setattr(cls, property_name, property(fget, fset, fdel))
-            del_abstractmethod(cls,property_name)
+            del_abstractmethod(cls, property_name)
         return cls
 
     return decorator
