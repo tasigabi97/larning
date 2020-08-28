@@ -1,16 +1,17 @@
 from collections.abc import Iterable
 from larning.property import with_property
-from larning.abc import Namable
+from larning.abc import Namable,Printable
+from collections.abc import Sequence
 from collections.abc import Callable as aCallable
 from typing import Callable as tCallable
 from pydantic import validate_arguments
 from abc import ABCMeta
 from larning.metaclass import CollectorType
 from larning.os import Proc
-
-
+from typing import Union
+from larning.strings import func_to_str
 class InputVariable(
-    Namable, metaclass=type("InputVariableType", (CollectorType, ABCMeta), {})
+    Namable,Printable, metaclass=type("InputVariableType", (CollectorType, ABCMeta), {})
 ):
     def __init__(self, name: str):
         self._name, self._value = name, None
@@ -40,30 +41,47 @@ InputVariableFactory = InputVariable.Factory()
 
 
 class Task(
-    Namable, aCallable, metaclass=type("TaskType", (CollectorType, ABCMeta), {})
+    Namable,Printable, aCallable, metaclass=type("TaskType", (CollectorType, ABCMeta), {})
 ):
     @validate_arguments
-    def __init__(self, name: str, callable_: tCallable):
-        self._name, self._callable = name, callable_
+    def __init__(self, func: tCallable, args=None, kwargs=None, name: Union[str, None] = None):
+        self._func, self._args,self._kwargs, self._name, =func,args,kwargs, name
+        self._args=[] if self._args is None else self._args
+        self._kwargs=dict() if self._kwargs is None else self._kwargs
+
+    def __str__(self):
+        return self.name+"->"+func_to_str(self._func,*self._args,**self._kwargs)
+
 
     def __call__(self):
-        return self._callable()
+        args=[arg.value if isinstance(arg,InputVariable) else arg for arg in self._args]
+        kwargs = {key:value.value if isinstance(value,InputVariable) else value for key,value in self._kwargs.items()}
+        return self._func(*args,**kwargs)
 
     @property
     def name(self):
         return self._name
 
     class Factory:
-        def __setattr__(self, name, value):
-            if isinstance(value,list):
-                return
-                callable_=Proc(*value[1],wd_path=v)
-            Task(name,callable_)
+        def __setattr__(self, name, l:list):
+            args,kwargs=[],{}
+            for i in l:
+                if isinstance(i,Sequence):
+                    args=i
+                if isinstance(i,dict):
+                    kwargs=i
+            Task(l[0],args,kwargs,name=name)
+
+        def __getattr__(self, name):
+            for task in Task:
+                if task.name == name:
+                    return task
+
 
 TaskFactory = Task.Factory()
 
 @with_property("name")
-class TaskList(aCallable):
+class TaskList(aCallable,Namable):
     @validate_arguments
     def __init__(self, *tasks: tCallable, name: str = None):
         self.name = name
