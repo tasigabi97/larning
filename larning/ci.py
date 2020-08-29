@@ -34,7 +34,7 @@ class InputVariable(
     @property
     def value(self):
         if self._value is None:
-            self._value = input("\n" + str(self) + ":=")
+            self._value = input(str(self) + ":=")
         return self._value
 
     @staticmethod
@@ -148,8 +148,11 @@ class Script(
         ret = []
         print(self.name)
         for task in self._tasks:
-            print(str(task))
-            input("Press Enter to run task...")
+            if (
+                input(f"Press Enter to run |{str(task)}| or s to skip actual task...")
+                == "s"
+            ):
+                continue
             t = task()
             print(task.name + "==" + str(t)), ret.append(t)
         return ret
