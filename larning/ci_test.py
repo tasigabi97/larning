@@ -1,7 +1,9 @@
-from larning.testing import name, input_manager
+from larning.testing import name, input_manager, argv_manager
 from larning.ci import InputVariable, Task, Script, ProcTask, ci_manager
 from pytest import raises
 from pydantic import ValidationError
+from sys import argv
+from unittest.mock import MagicMock
 
 
 def setup_function():
@@ -149,19 +151,85 @@ def _():
         )() == ["1", "2"]
 
 
-@name(ci_manager, 1, globals())
+@name(ci_manager, "goodargv", globals())
 def _():
-    with ci_manager() as (iF, tF, pF, sF):
-        assert (
-            isinstance(iF, InputVariable.Factory)
-            and isinstance(tF, Task.Factory)
-            and isinstance(pF, ProcTask.Factory)
-            and isinstance(sF, Script.Factory)
-        )
-        sF.script1=[]
-        sF.script2=[]
-        assert "script1" in Script
+    with argv_manager("", "script1"):
+        with ci_manager() as (iF, tF, pF, sF):
+            assert (
+                isinstance(iF, InputVariable.Factory)
+                and isinstance(tF, Task.Factory)
+                and isinstance(pF, ProcTask.Factory)
+                and isinstance(sF, Script.Factory)
+            )
+            sF.script1 = []
+            sF.script2 = []
+            assert "script1" in Script
 
+
+@name(ci_manager, "badargv", globals())
+def _():
+    with argv_manager("", "bad"):
+        with raises(NameError):
+            with ci_manager() as (iF, tF, pF, sF):
+                assert (
+                    isinstance(iF, InputVariable.Factory)
+                    and isinstance(tF, Task.Factory)
+                    and isinstance(pF, ProcTask.Factory)
+                    and isinstance(sF, Script.Factory)
+                )
+                sF.script1 = []
+                sF.script2 = []
+                assert "script1" in Script
+
+
+@name(ci_manager, "goodinput", globals())
+def _():
+    with argv_manager():
+        with input_manager("script2"):
+            with ci_manager() as (iF, tF, pF, sF):
+                assert (
+                    isinstance(iF, InputVariable.Factory)
+                    and isinstance(tF, Task.Factory)
+                    and isinstance(pF, ProcTask.Factory)
+                    and isinstance(sF, Script.Factory)
+                )
+                sF.script1 = []
+                sF.script2 = []
+                assert "script1" in Script
+
+
+@name(ci_manager, "badinput", globals())
+def _():
+    with argv_manager():
+        with input_manager("bad"):
+            with raises(NameError):
+                with ci_manager() as (iF, tF, pF, sF):
+                    assert (
+                        isinstance(iF, InputVariable.Factory)
+                        and isinstance(tF, Task.Factory)
+                        and isinstance(pF, ProcTask.Factory)
+                        and isinstance(sF, Script.Factory)
+                    )
+                    sF.script1 = []
+                    sF.script2 = []
+                    assert "script1" in Script
+
+
+@name(ci_manager, "call", globals())
+def _():
+    with argv_manager("", "script1"):
+        with ci_manager() as (iF, tF, pF, sF):
+            assert (
+                isinstance(iF, InputVariable.Factory)
+                and isinstance(tF, Task.Factory)
+                and isinstance(pF, ProcTask.Factory)
+                and isinstance(sF, Script.Factory)
+            )
+            sF.script1 = []
+            sF.script2 = []
+            Script.__call__ = MagicMock()
+            Script.__call__.assert_not_called()
+    Script.__call__.assert_called_once()
 
 
 @name(Script.Factory.__setattr__, 1, globals())

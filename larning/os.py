@@ -31,11 +31,17 @@ class Proc(Callable):
                 args, capture_output=True, env=self._env, shell=self._shell
             )
             self.stdout, self.stderr, self.exit_code = (
-                p.stdout.decode("ascii"),
-                p.stderr.decode("ascii"),
+                p.stdout.decode(),
+                p.stderr.decode(),
                 p.returncode,
             )
-            p.check_returncode()
+            try:
+                p.check_returncode()
+            except Exception as e:
+                print(
+                    f"exitcode=={self.exit_code}\nstdout=={self.stdout}\nstderr=={self.stderr}"
+                )
+                raise e
         return self
 
 

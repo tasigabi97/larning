@@ -1,6 +1,7 @@
-from larning.testing import name, input_manager
+from larning.testing import name, input_manager, argv_manager
 from pydantic import ValidationError
 from pytest import raises
+from sys import argv
 
 # name TESTˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇ
 def basic_func():
@@ -118,3 +119,10 @@ def test_name():
 def test_input_manager():
     with input_manager("a"):
         assert input() == "a"
+
+
+def test_argv_manager():
+    o = list(argv)
+    with argv_manager("a", "b"):
+        assert argv == ["a", "b"]
+    assert argv == o

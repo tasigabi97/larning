@@ -43,5 +43,3 @@ class CollectorType(type):
 
     def __len__(new_cls):
         return len(new_cls._objects)
-
-

@@ -13,6 +13,8 @@ from typing import Union
 from larning.strings import func_to_str, concatenate_with_separation
 from contextlib import contextmanager
 from sys import argv
+from shutil import rmtree
+from os.path import isdir
 
 AbstractCollectorMetaclass = type(
     "AbstractCollectorMetaclass", (CollectorType, ABCMeta), {}
@@ -147,7 +149,7 @@ class Script(
         print(self.name)
         for task in self._tasks:
             print(str(task))
-            input("Press Enter to continue...")
+            input("Press Enter to run task...")
             t = task()
             print(task.name + "==" + str(t)), ret.append(t)
         return ret
@@ -160,12 +162,23 @@ class Script(
 @contextmanager
 def ci_manager():
     yield InputVariable.Factory(), Task.Factory(), ProcTask.Factory(), Script.Factory()
-    if len(argv)  > 1:
-        [Script[arg]()  for arg in argv[1:] if arg in Script ]
+    template = "there is not any script with name: {}"
+    if len(argv) > 1:
+        for arg in argv[1:]:
+            if arg in Script:
+                Script[arg]()
+            else:
+                raise NameError(template.format(arg))
     else:
         [print(s) for s in Script]
-        name=input("Select a Script")
-        Script[name]()
+        name = input("Select a Script: ")
+        if name in Script:
+            Script[name]()
+        else:
+            raise NameError(template.format(name))
 
 
-
+def rmdirs(*paths):
+    for path in paths:
+        if isdir(path):
+            rmtree(path)
