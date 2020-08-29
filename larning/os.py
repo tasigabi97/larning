@@ -28,7 +28,7 @@ class Proc(Callable):
         args = self._command if self._shell else self._args
         with self._wd:
             p: CompletedProcess = run(
-                args, capture_output=True, env=self._env, shell=self._shell
+                args, capture_output=True, env=self._env, shell=self._shell,
             )
             self.stdout, self.stderr, self.exit_code = (
                 p.stdout.decode(),

@@ -28,13 +28,27 @@ with ci_manager() as (iF, tF, pF, sF):
         original_wd,
         "twine",
         "upload",
+        "-u",
+        "tasigabi97",
+        "-p",
+        iF.pipy_password,
         "--repository-url",
         "https://test.pypi.org/legacy/",
         "dist/*",
     ]
-    pF.twine_upload = [original_wd, "twine", "upload", "dist/*"]
+    pF.twine_upload = [
+        original_wd,
+        "twine",
+        "upload",
+        "-u",
+        "tasigabi97",
+        "-p",
+        iF.pipy_password,
+        "dist/*",
+    ]
 
     sF.a = [
+        pF.twine_test,
         tF.delete_dirs,
         pF.install,
         pF.black,

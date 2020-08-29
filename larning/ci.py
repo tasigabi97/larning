@@ -111,7 +111,7 @@ class ProcTask(Task):
         args, kwargs = InputVariable.convert_InputVariables(
             self._args, self._kwargs, lambda x: x.value
         )
-        p = Proc(*args, **kwargs, shell=True)()
+        p = Proc(*args, **kwargs)()
         return concatenate_with_separation([p.exit_code, p.stdout, p.stderr], "->")
 
     class Factory:
