@@ -19,8 +19,11 @@ with ci_manager() as (iF, tF, pF, sF):
     pF.git_status = [original_wd, "git", "status"]
     pF.git_add_all = [original_wd, "git", "add", "."]
     pF.git_commit = [original_wd, "git", "commit", "-m", iF.commit_message]
+    pF.git_push = [original_wd, "git", "push"]
     pF.pytest = [original_wd, "pytest", "-s"]
     pF.install = [original_wd, "./setup.py", "install"]
+    pF.sdist = [original_wd, "./setup.py", "sdist", "bdist_wheel"]
+    pF.twine_check = [original_wd, "twine", "check", "dist/*"]
     sF.a = [
         tF.delete_dirs,
         pF.install,
@@ -29,4 +32,7 @@ with ci_manager() as (iF, tF, pF, sF):
         pF.git_status,
         pF.git_add_all,
         pF.git_commit,
+        pF.git_push,
+        pF.sdist,
+        pF.twine_check,
     ]
