@@ -24,6 +24,16 @@ with ci_manager() as (iF, tF, pF, sF):
     pF.install = [original_wd, "./setup.py", "install"]
     pF.sdist = [original_wd, "./setup.py", "sdist", "bdist_wheel"]
     pF.twine_check = [original_wd, "twine", "check", "dist/*"]
+    pF.twine_test = [
+        original_wd,
+        "twine",
+        "upload",
+        "--repository-url",
+        "https://test.pypi.org/legacy/",
+        "dist/*",
+    ]
+    pF.twine_upload = [original_wd, "twine", "upload", "dist/*"]
+
     sF.a = [
         tF.delete_dirs,
         pF.install,
@@ -35,4 +45,6 @@ with ci_manager() as (iF, tF, pF, sF):
         pF.git_push,
         pF.sdist,
         pF.twine_check,
+        pF.twine_test,
+        pF.twine_upload,
     ]

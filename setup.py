@@ -79,7 +79,6 @@ setup(
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Education",
     ],
     install_requires=install_requires,
     keywords=[package_name,],
