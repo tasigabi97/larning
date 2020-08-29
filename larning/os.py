@@ -22,7 +22,7 @@ class Proc(Callable):
         self._wd = Directory(getcwd()) if wd_path is None else Directory(wd_path)
 
     def __str__(self) -> str:
-        return concatenate_with_separation([self._wd.path, self._command], "-> ")
+        return concatenate_with_separation([self._wd.path, self._command], "$ ")
 
     def __call__(self) -> "Proc":
         args = self._command if self._shell else self._args

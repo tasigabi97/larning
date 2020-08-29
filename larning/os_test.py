@@ -44,7 +44,7 @@ def _():
 
 @name(Proc.__str__, 1, globals())
 def _():
-    assert str(Proc("echo", 1)) == getcwd() + "-> echo 1"
+    assert str(Proc("echo", 1)) == getcwd() + "$ echo 1"
 
 
 @name(Proc, "properties", globals())

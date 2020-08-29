@@ -4,14 +4,19 @@ from larning.abc import Namable, Printable, ContextManager
 from collections.abc import Sequence
 from collections.abc import Callable as aCallable
 from typing import Callable as tCallable
+from typing import Any
 from pydantic import validate_arguments
 from abc import ABCMeta
 from larning.metaclass import CollectorType
 from larning.os import Proc
 from typing import Union
 from larning.strings import func_to_str, concatenate_with_separation
+from contextlib import contextmanager
+from sys import argv
 
-AbstractCollectorMetaclass = type("InputVariableType", (CollectorType, ABCMeta), {})
+AbstractCollectorMetaclass = type(
+    "AbstractCollectorMetaclass", (CollectorType, ABCMeta), {}
+)
 
 
 class InputVariable(
@@ -27,14 +32,14 @@ class InputVariable(
     @property
     def value(self):
         if self._value is None:
-            self._value = input(str(self) + ":=")
+            self._value = input("\n" + str(self) + ":=")
         return self._value
 
     @staticmethod
-    def collect_input(args, kwargs):
-        args = [arg.value if isinstance(arg, InputVariable) else arg for arg in args]
+    def convert_InputVariables(args, kwargs, func: tCallable[["InputVariable"], Any]):
+        args = [func(arg) if isinstance(arg, InputVariable) else arg for arg in args]
         kwargs = {
-            key: value.value if isinstance(value, InputVariable) else value
+            key: func(value) if isinstance(value, InputVariable) else value
             for key, value in kwargs.items()
         }
         return args, kwargs
@@ -65,7 +70,9 @@ class Task(
         return self.name + "->" + func_to_str(self._func, *self._args, **self._kwargs)
 
     def __call__(self):
-        args, kwargs = InputVariable.collect_input(self._args, self._kwargs)
+        args, kwargs = InputVariable.convert_InputVariables(
+            self._args, self._kwargs, lambda x: x.value
+        )
         return self._func(*args, **kwargs)
 
     @property
@@ -86,8 +93,31 @@ class Task(
             return Task[name]
 
 
-class ProcTask(Task, metaclass=AbstractCollectorMetaclass):
-    ...
+class ProcTask(Task):
+    def __init__(self, args=None, kwargs=None, name: Union[str, None] = None):
+        self._args, self._kwargs, self._name, = args, kwargs, name
+        self._args = [] if self._args is None else self._args
+        self._kwargs = dict() if self._kwargs is None else self._kwargs
+
+    def __str__(self):
+        args, kwargs = InputVariable.convert_InputVariables(
+            self._args, self._kwargs, lambda x: str(x)
+        )
+        return self.name + "->" + str(Proc(*args, **kwargs))
+
+    def __call__(self):
+        args, kwargs = InputVariable.convert_InputVariables(
+            self._args, self._kwargs, lambda x: x.value
+        )
+        p = Proc(*args, **kwargs)()
+        return concatenate_with_separation([p.exit_code, p.stdout, p.stderr], "->")
+
+    class Factory:
+        def __setattr__(self, name, l: list):
+            ProcTask(args=l[1:], kwargs={"wd_path": l[0]}, name=name)
+
+        def __getattr__(self, name):
+            return ProcTask[name]
 
 
 class Script(
@@ -118,15 +148,24 @@ class Script(
         for task in self._tasks:
             print(str(task))
             input("Press Enter to continue...")
-            ret.append(task())
+            t = task()
+            print(task.name + "==" + str(t)), ret.append(t)
         return ret
 
-    class Factory(ContextManager):
+    class Factory:
         def __setattr__(self, name, l: list):
             Script(*l, name=name)
 
-        def __enter__(self):
-            return InputVariable.Factory(), Task.Factory(), Script.Factory()
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            ...
+@contextmanager
+def ci_manager():
+    yield InputVariable.Factory(), Task.Factory(), ProcTask.Factory(), Script.Factory()
+    if len(argv)  > 1:
+        [Script[arg]()  for arg in argv[1:] if arg in Script ]
+    else:
+        [print(s) for s in Script]
+        name=input("Select a Script")
+        Script[name]()
+
+
+

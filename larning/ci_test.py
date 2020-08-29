@@ -1,12 +1,11 @@
 from larning.testing import name, input_manager
-from larning.ci import InputVariable, Task, Script, ProcTask
+from larning.ci import InputVariable, Task, Script, ProcTask, ci_manager
 from pytest import raises
 from pydantic import ValidationError
 
 
-def setup_function(func):
-    Script.clear()
-    Task.clear()
+def setup_function():
+    InputVariable.clear(), Task.clear(), ProcTask.clear(), Script.clear()
 
 
 @name(InputVariable.__init__, 0, globals())
@@ -88,10 +87,45 @@ def _():
     assert len(Task) == 0 == len(ProcTask)
     Task(lambda: 1)
     assert len(Task) == 1 and len(ProcTask) == 0
-    ProcTask(lambda: 1)
-    assert len(Task) == 2 and len(ProcTask) == 1
-
+    ProcTask()
+    assert len(Task) == 1 and len(ProcTask) == 1
     assert hasattr(ProcTask, "_objects")
+
+
+@name(ProcTask.__str__, 1, globals())
+def _():
+    assert (
+        str(
+            ProcTask(
+                ["echo", "a", InputVariable.Factory().a],
+                {"wd_path": "/home"},
+                "ProcName",
+            )
+        )
+        == "ProcName->/home$ echo a <@a@>"
+    )
+
+
+@name(ProcTask.__call__, 1, globals())
+def _():
+    with input_manager("a"):
+        assert (
+            ProcTask(
+                ["echo", "a", InputVariable.Factory().a],
+                {"wd_path": "/home"},
+                "ProcName",
+            )()
+            == "0->a a\n->"
+        )
+
+
+@name(ProcTask.Factory.__setattr__, 1, globals())
+def _():
+    pF = ProcTask.Factory()
+    assert len(ProcTask) == 0
+    pF.ProcName = ["/home", "echo", "a", InputVariable.Factory().a]
+    assert len(ProcTask) == 1
+    assert str(pF.ProcName) == "ProcName->/home$ echo a <@a@>"
 
 
 @name(Script.__str__, 1, globals())
@@ -115,14 +149,19 @@ def _():
         )() == ["1", "2"]
 
 
-@name(Script.Factory.__enter__, 1, globals())
+@name(ci_manager, 1, globals())
 def _():
-    with Script.Factory() as (iF, tF, sF):
+    with ci_manager() as (iF, tF, pF, sF):
         assert (
             isinstance(iF, InputVariable.Factory)
             and isinstance(tF, Task.Factory)
+            and isinstance(pF, ProcTask.Factory)
             and isinstance(sF, Script.Factory)
         )
+        sF.script1=[]
+        sF.script2=[]
+        assert "script1" in Script
+
 
 
 @name(Script.Factory.__setattr__, 1, globals())
