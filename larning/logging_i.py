@@ -18,6 +18,5 @@ def get_logger_func(
 
 
 get_debug, get_info, get_warning, get_error, get_critical = [
-    partial(get_logger_func, funcname)
-    for funcname in ["debug", "info", "warning", "error", "critical"]
+    partial(get_logger_func, funcname) for funcname in ["debug", "info", "warning", "error", "critical"]
 ]

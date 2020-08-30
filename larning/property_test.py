@@ -42,13 +42,7 @@ def _():
     assert hasattr(a, "first") and ("first" not in a.__dict__.keys())
     assert hasattr(a, "_first") and ("_first" in a.__dict__.keys())
     assert a.first == 1 == getattr(a, "first") == a.__getattribute__("first")
-    assert (
-        a._first
-        == 1
-        == getattr(a, "_first")
-        == a.__getattribute__("_first")
-        == a.__dict__["_first"]
-    )
+    assert a._first == 1 == getattr(a, "_first") == a.__getattribute__("_first") == a.__dict__["_first"]
     del a.first
     assert (not hasattr(a, "first")) and ("first" not in a.__dict__.keys())
     assert (not hasattr(a, "_first")) and ("_first" not in a.__dict__.keys())

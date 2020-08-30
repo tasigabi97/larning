@@ -49,27 +49,9 @@ def _():
     assert get_logger("a").name == "a"
     assert get_logger(basic_func).name == "larning.logging_test.basic_func"
     assert get_logger(basic_class).name == "larning.logging_test.basic_class"
-    assert (
-        get_logger(basic_class.basic_method).name
-        == "larning.logging_test.basic_class.basic_method"
-    )
-    assert (
-        get_logger(basic_class.basic_classmethod).name
-        == "larning.logging_test.basic_class.basic_classmethod"
-    )
-    assert (
-        get_logger(basic_class.basic_staticmethod).name
-        == "larning.logging_test.basic_class.basic_staticmethod"
-    )
-    assert (
-        get_logger(basic_class.nested_class).name
-        == "larning.logging_test.basic_class.nested_class"
-    )
-    assert (
-        get_logger(basic_class.nested_class.a.fget).name
-        == "larning.logging_test.basic_class.nested_class.a"
-    )
-    assert (
-        get_logger(basic_class.nested_class.a.fset).name
-        == "larning.logging_test.basic_class.nested_class.a"
-    )
+    assert get_logger(basic_class.basic_method).name == "larning.logging_test.basic_class.basic_method"
+    assert get_logger(basic_class.basic_classmethod).name == "larning.logging_test.basic_class.basic_classmethod"
+    assert get_logger(basic_class.basic_staticmethod).name == "larning.logging_test.basic_class.basic_staticmethod"
+    assert get_logger(basic_class.nested_class).name == "larning.logging_test.basic_class.nested_class"
+    assert get_logger(basic_class.nested_class.a.fget).name == "larning.logging_test.basic_class.nested_class.a"
+    assert get_logger(basic_class.nested_class.a.fset).name == "larning.logging_test.basic_class.nested_class.a"

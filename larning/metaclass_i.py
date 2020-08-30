@@ -5,20 +5,13 @@ class CollectorType(type):
 
     # it is a staticmethod
     def __new__(
-        collectorType: type,
-        new_cls_name: str,
-        new_cls_bases: tuple,
-        class_definition_dict: dict,
+        collectorType: type, new_cls_name: str, new_cls_bases: tuple, class_definition_dict: dict,
     ):
-        new_cls = super().__new__(
-            collectorType, new_cls_name, new_cls_bases, class_definition_dict
-        )
+        new_cls = super().__new__(collectorType, new_cls_name, new_cls_bases, class_definition_dict)
         return new_cls  # __init__()
 
     # called before __new__ return automatically
-    def __init__(
-        new_cls: type, new_cls_name: str, new_cls_bases: tuple, new_cls_dict: dict
-    ):
+    def __init__(new_cls: type, new_cls_name: str, new_cls_bases: tuple, new_cls_dict: dict):
         super().__init__(new_cls_name, new_cls_bases, new_cls_dict)
         new_cls._objects = set()
         original_init = new_cls.__init__

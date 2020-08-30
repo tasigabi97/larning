@@ -4,11 +4,7 @@ from abc import ABC, abstractmethod
 def del_abstractmethod(cls: type, method_name: str):
     if "__abstractmethods__" in cls.__dict__.keys():
         setattr(
-            cls,
-            "__abstractmethods__",
-            frozenset(
-                [i for i in cls.__dict__["__abstractmethods__"] if i != method_name]
-            ),
+            cls, "__abstractmethods__", frozenset([i for i in cls.__dict__["__abstractmethods__"] if i != method_name]),
         )
 
 

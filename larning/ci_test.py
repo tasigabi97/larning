@@ -60,12 +60,7 @@ def _():
 
 @name(Task.__call__, InputVariable.__name__, globals())
 def _():
-    t = Task(
-        (lambda x, y=None: x + y),
-        [InputVariable("x")],
-        {"y": InputVariable("y")},
-        name="name",
-    )
+    t = Task((lambda x, y=None: x + y), [InputVariable("x")], {"y": InputVariable("y")}, name="name",)
     with input_manager("x\ny"):
         assert t() == "xy"
     assert t() == "xy"
@@ -75,11 +70,7 @@ def _():
 def _():
     TaskFactory = Task.Factory()
     TaskFactory.a = [lambda x: x, [1], {}]
-    assert (
-        TaskFactory.a.name == "a"
-        and isinstance(TaskFactory.a, Task)
-        and TaskFactory.a() == 1
-    )
+    assert TaskFactory.a.name == "a" and isinstance(TaskFactory.a, Task) and TaskFactory.a() == 1
     TaskFactory.b = [lambda: 2]
     assert TaskFactory.b.name == "b" and TaskFactory.b() == 2
 
@@ -96,29 +87,13 @@ def _():
 
 @name(ProcTask.__str__, 1, globals())
 def _():
-    assert (
-        str(
-            ProcTask(
-                ["echo", "a", InputVariable.Factory().a],
-                {"wd_path": "/home"},
-                "ProcName",
-            )
-        )
-        == "ProcName->/home$ echo a <@a@>"
-    )
+    assert str(ProcTask(["echo", "a", InputVariable.Factory().a], {"wd_path": "/home"}, "ProcName",)) == "ProcName->/home$ echo a <@a@>"
 
 
 @name(ProcTask.__call__, 1, globals())
 def _():
     with input_manager("a"):
-        assert (
-            ProcTask(
-                ["echo", "a", InputVariable.Factory().a],
-                {"wd_path": "/home"},
-                "ProcName",
-            )()
-            == "0->a a\n->"
-        )
+        assert ProcTask(["echo", "a", InputVariable.Factory().a], {"wd_path": "/home"}, "ProcName",)() == "0->a a\n->"
 
 
 @name(ProcTask.Factory.__setattr__, 1, globals())
@@ -132,22 +107,16 @@ def _():
 
 @name(Script.__str__, 1, globals())
 def _():
-    assert "name:\n\t\t1-><lambda>()\n\t\t2-><lambda>()" == str(
-        Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name")
-    )
+    assert "name:\n\t\t1-><lambda>()\n\t\t2-><lambda>()" == str(Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name"))
 
 
 @name(Script.__call__, 1, globals())
 def _():
     with input_manager("\n\n"):
-        assert Script(
-            Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name"
-        )() == [1, 2]
+        assert Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name")() == [1, 2]
     with input_manager("\n1\n\n2\n"):
         assert Script(
-            Task(lambda x: x, [InputVariable("1")], name="1"),
-            Task(lambda y=None: y, kwargs={"y": InputVariable("2")}, name="2"),
-            name="name",
+            Task(lambda x: x, [InputVariable("1")], name="1"), Task(lambda y=None: y, kwargs={"y": InputVariable("2")}, name="2"), name="name",
         )() == ["1", "2"]
 
 
@@ -156,10 +125,7 @@ def _():
     with argv_manager("", "script1"):
         with ci_manager() as (iF, tF, pF, sF):
             assert (
-                isinstance(iF, InputVariable.Factory)
-                and isinstance(tF, Task.Factory)
-                and isinstance(pF, ProcTask.Factory)
-                and isinstance(sF, Script.Factory)
+                isinstance(iF, InputVariable.Factory) and isinstance(tF, Task.Factory) and isinstance(pF, ProcTask.Factory) and isinstance(sF, Script.Factory)
             )
             sF.script1 = []
             sF.script2 = []
@@ -220,10 +186,7 @@ def _():
     with argv_manager("", "script1"):
         with ci_manager() as (iF, tF, pF, sF):
             assert (
-                isinstance(iF, InputVariable.Factory)
-                and isinstance(tF, Task.Factory)
-                and isinstance(pF, ProcTask.Factory)
-                and isinstance(sF, Script.Factory)
+                isinstance(iF, InputVariable.Factory) and isinstance(tF, Task.Factory) and isinstance(pF, ProcTask.Factory) and isinstance(sF, Script.Factory)
             )
             sF.script1 = []
             sF.script2 = []

@@ -13,23 +13,9 @@ def with_property(*property_names: str) -> Callable:
                 property_name + "_deleter",
                 "_" + property_name,
             )
-            fget = (
-                cls.__dict__[get_name]
-                if get_name in cls.__dict__.keys()
-                else (lambda val_name: lambda self: getattr(self, val_name))(val_name)
-            )
-            fset = (
-                cls.__dict__[set_name]
-                if set_name in cls.__dict__.keys()
-                else (lambda val_name: lambda self, x: setattr(self, val_name, x))(
-                    val_name
-                )
-            )
-            fdel = (
-                cls.__dict__[del_name]
-                if del_name in cls.__dict__.keys()
-                else (lambda val_name: lambda self: delattr(self, val_name))(val_name)
-            )
+            fget = cls.__dict__[get_name] if get_name in cls.__dict__.keys() else (lambda val_name: lambda self: getattr(self, val_name))(val_name)
+            fset = cls.__dict__[set_name] if set_name in cls.__dict__.keys() else (lambda val_name: lambda self, x: setattr(self, val_name, x))(val_name)
+            fdel = cls.__dict__[del_name] if del_name in cls.__dict__.keys() else (lambda val_name: lambda self: delattr(self, val_name))(val_name)
             setattr(cls, property_name, property(fget, fset, fdel))
             del_abstractmethod(cls, property_name)
         return cls

@@ -9,11 +9,7 @@ from pprint import pformat
 def to_str(obj):
     default_str = object.__str__(obj)
     actual_str = str(obj)
-    return (
-        obj.__class__.__name__ + to_str(obj.__dict__)
-        if default_str == actual_str
-        else actual_str
-    )
+    return obj.__class__.__name__ + to_str(obj.__dict__) if default_str == actual_str else actual_str
 
 
 @to_str.register(type(None))

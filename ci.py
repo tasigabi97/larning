@@ -1,43 +1,32 @@
 #! /usr/bin/env python
 
-from larning.ci import ci_manager, rmdirs
+from larning.ci import ci_manager, rmdirs, mkdirs
 from os import getcwd
 from os.path import join
-from larning import __name__ as larning_name
+from larning import __name__ as project_name
 
-print(larning_name)
 with ci_manager() as (iF, tF, pF, sF):
-    original_wd = getcwd()
-    build_d, egg_d, dist_d = (
-        join(original_wd, "build"),
-        join(original_wd, larning_name + ".egg-info"),
-        join(original_wd, "dist"),
+    WD = getcwd()
+    BUILD, EGG, DIST, DOCS = (
+        join(WD, "build"),
+        join(WD, project_name + ".egg-info"),
+        join(WD, "dist"),
+        join(WD, "docs"),
     )
-    print(build_d, egg_d, dist_d)
-    tF.delete_dirs = [rmdirs, [build_d, egg_d, dist_d]]
-    pF.black = [original_wd, "black", "."]
-    pF.git_status = [original_wd, "git", "status"]
-    pF.git_add_all = [original_wd, "git", "add", "."]
-    pF.git_commit = [original_wd, "git", "commit", "-m", iF.commit_message]
-    pF.git_push = [original_wd, "git", "push"]
-    pF.pytest = [original_wd, "pytest", "-s"]
-    pF.install = [original_wd, "./setup.py", "install"]
-    pF.sdist = [original_wd, "./setup.py", "sdist", "bdist_wheel"]
-    pF.twine_check = [original_wd, "twine", "check", "dist/*"]
-    pF.twine_test = [
-        original_wd,
-        "twine",
-        "upload",
-        "-u",
-        "tasigabi97",
-        "-p",
-        iF.pipy_password,
-        "--repository-url",
-        "https://test.pypi.org/legacy/",
-        "dist/*",
-    ]
+    tF.delete_temp_dirs = [rmdirs, [BUILD, EGG, DIST]]
+    tF.create_docs_dir = [mkdirs, [DOCS]]
+    pF.init_docs = [DOCS, "sphinx-quickstart"]
+    pF.black = [WD, "black", ".", "-t", "py38", "-l", "160"]
+    pF.git_status = [WD, "git", "status"]
+    pF.git_add_all = [WD, "git", "add", "."]
+    pF.git_commit = [WD, "git", "commit", "-m", iF.commit_message]
+    pF.git_push = [WD, "git", "push"]
+    pF.pytest = [WD, "pytest", "-s"]
+    pF.setup = [WD, "./setup.py", "install"]
+    pF.sdist = [WD, "./setup.py", "sdist", "bdist_wheel"]
+    pF.twine_check = [WD, "twine", "check", "dist/*"]
     pF.twine_upload = [
-        original_wd,
+        WD,
         "twine",
         "upload",
         "-u",
@@ -46,19 +35,19 @@ with ci_manager() as (iF, tF, pF, sF):
         iF.pipy_password,
         "dist/*",
     ]
+
+    sF.init_docs = [tF.create_docs_dir, pF.init_docs]
+    sF.setup = [pF.setup]
 
     sF.a = [
-        pF.twine_test,
-        tF.delete_dirs,
-        pF.install,
         pF.black,
         pF.pytest,
+        tF.delete_temp_dirs,
         pF.git_status,
         pF.git_add_all,
         pF.git_commit,
         pF.git_push,
         pF.sdist,
         pF.twine_check,
-        pF.twine_test,
         pF.twine_upload,
     ]

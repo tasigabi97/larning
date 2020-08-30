@@ -14,11 +14,10 @@ from larning.strings import func_to_str, concatenate_with_separation
 from contextlib import contextmanager
 from sys import argv
 from shutil import rmtree
-from os.path import isdir
+from os.path import isdir, exists
+from os import mkdir
 
-AbstractCollectorMetaclass = type(
-    "AbstractCollectorMetaclass", (CollectorType, ABCMeta), {}
-)
+AbstractCollectorMetaclass = type("AbstractCollectorMetaclass", (CollectorType, ABCMeta), {})
 
 
 class InputVariable(
@@ -40,10 +39,7 @@ class InputVariable(
     @staticmethod
     def convert_InputVariables(args, kwargs, func: tCallable[["InputVariable"], Any]):
         args = [func(arg) if isinstance(arg, InputVariable) else arg for arg in args]
-        kwargs = {
-            key: func(value) if isinstance(value, InputVariable) else value
-            for key, value in kwargs.items()
-        }
+        kwargs = {key: func(value) if isinstance(value, InputVariable) else value for key, value in kwargs.items()}
         return args, kwargs
 
     def __str__(self):
@@ -61,9 +57,7 @@ class Task(
     Namable, Printable, aCallable, metaclass=AbstractCollectorMetaclass,
 ):
     @validate_arguments
-    def __init__(
-        self, func: tCallable, args=None, kwargs=None, name: Union[str, None] = None
-    ):
+    def __init__(self, func: tCallable, args=None, kwargs=None, name: Union[str, None] = None):
         self._func, self._args, self._kwargs, self._name, = func, args, kwargs, name
         self._args = [] if self._args is None else self._args
         self._kwargs = dict() if self._kwargs is None else self._kwargs
@@ -72,9 +66,7 @@ class Task(
         return self.name + "->" + func_to_str(self._func, *self._args, **self._kwargs)
 
     def __call__(self):
-        args, kwargs = InputVariable.convert_InputVariables(
-            self._args, self._kwargs, lambda x: x.value
-        )
+        args, kwargs = InputVariable.convert_InputVariables(self._args, self._kwargs, lambda x: x.value)
         return self._func(*args, **kwargs)
 
     @property
@@ -102,15 +94,11 @@ class ProcTask(Task):
         self._kwargs = dict() if self._kwargs is None else self._kwargs
 
     def __str__(self):
-        args, kwargs = InputVariable.convert_InputVariables(
-            self._args, self._kwargs, lambda x: str(x)
-        )
+        args, kwargs = InputVariable.convert_InputVariables(self._args, self._kwargs, lambda x: str(x))
         return self.name + "->" + str(Proc(*args, **kwargs))
 
     def __call__(self):
-        args, kwargs = InputVariable.convert_InputVariables(
-            self._args, self._kwargs, lambda x: x.value
-        )
+        args, kwargs = InputVariable.convert_InputVariables(self._args, self._kwargs, lambda x: x.value)
         p = Proc(*args, **kwargs)()
         return concatenate_with_separation([p.exit_code, p.stdout, p.stderr], "->")
 
@@ -137,21 +125,13 @@ class Script(
 
     def __str__(self):
         sep = "\n\t\t"
-        return (
-            self.name
-            + ":"
-            + sep
-            + concatenate_with_separation([str(task) for task in self._tasks], sep)
-        )
+        return self.name + ":" + sep + concatenate_with_separation([str(task) for task in self._tasks], sep)
 
     def __call__(self):
         ret = []
-        print(self.name)
+        print(f"Script |{self.name}| is running:")
         for task in self._tasks:
-            if (
-                input(f"Press Enter to run |{str(task)}| or s to skip actual task...")
-                == "s"
-            ):
+            if input(f"Press Enter to run |{str(task)}| or s to skip actual task...") == "s":
                 continue
             t = task()
             print(task.name + "==" + str(t)), ret.append(t)
@@ -185,3 +165,9 @@ def rmdirs(*paths):
     for path in paths:
         if isdir(path):
             rmtree(path)
+
+
+def mkdirs(*paths):
+    for path in paths:
+        if not exists(path):
+            mkdir(path)

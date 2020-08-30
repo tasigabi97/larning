@@ -10,6 +10,4 @@ def func_to_str(func: Callable, *args, **kwargs):
     sep = ", "
     args = [to_str(arg) for arg in args]
     kwargs = [key + "=" + to_str(value) for key, value in kwargs.items()]
-    return func.__name__ + "({})".format(
-        concatenate_with_separation(args + kwargs, sep)
-    )
+    return func.__name__ + "({})".format(concatenate_with_separation(args + kwargs, sep))
