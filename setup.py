@@ -7,9 +7,15 @@ from json import loads
 from shutil import rmtree
 from os.path import dirname, realpath, join
 from setuptools import setup, find_packages
+from larning.setup import get_package_name
 
 # consts
-package_name = find_packages()[0]
+print(__name__)
+print(__file__)
+print(realpath(__file__))
+package_name = find_packages(dirname(realpath(__file__)))[0]
+print(package_name)
+input()
 with open("README.md", "r") as fh:
     long_description = fh.read()
 root_path = dirname(realpath(__file__))

@@ -32,6 +32,9 @@ Submodules
    larning.re
    larning.re_i
    larning.re_test
+   larning.setup
+   larning.setup_i
+   larning.setup_test
    larning.strings
    larning.strings_i
    larning.strings_test

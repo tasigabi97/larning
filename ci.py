@@ -15,7 +15,8 @@ with ci_manager() as (iF, tF, pF, sF):
         join(WD, ".pytest_cache"),
     )
     _BUILD = join(DOCS, "_build")
-    tF.delete_temp_dirs = [rmdirs, [BUILD, EGG, DIST, _BUILD, PYTEST]]
+    tF.delete_before = [rmdirs, [BUILD, EGG, DIST, _BUILD, PYTEST]]
+    tF.delete_after = [rmdirs, [BUILD, EGG, DIST, PYTEST]]
     tF.create_docs_dir = [mkdirs, [DOCS]]
     pF.install_make = [DOCS, "sudo", "apt", "install", "make"]
     pF.init_docs = [DOCS, "sphinx-quickstart"]
@@ -49,7 +50,7 @@ with ci_manager() as (iF, tF, pF, sF):
     sF.a = [
         pF.pytest,
         pF.black,
-        tF.delete_temp_dirs,
+        tF.delete_before,
         pF.apidoc,
         # pF.latexpdf,
         pF.html,
@@ -60,4 +61,5 @@ with ci_manager() as (iF, tF, pF, sF):
         pF.sdist,
         pF.twine_check,
         pF.twine_upload,
+        tF.delete_after,
     ]
