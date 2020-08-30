@@ -9,8 +9,8 @@ from sys import version_info
 
 setup = setup
 ROOT = dirname(realpath("./setup.py"))
-PACKAGE_NAME = find_packages(ROOT)[0]
-PACKAGES = find_packages()
+PACKAGES = find_packages(ROOT)
+PACKAGE_NAME = PACKAGES[0]
 with open(join(ROOT, "README.md"), "r") as fh:
     LONG_DESCRIPTION = fh.read()
 

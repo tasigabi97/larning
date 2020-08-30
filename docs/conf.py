@@ -1,13 +1,17 @@
 import os
 import sys
+from os import chdir
 
-sys.path.insert(0, os.path.abspath(".."))
+ROOT = os.path.abspath("..")
+chdir(ROOT)
+sys.path.insert(0, ROOT)
+from larning.setup import get_version
 
 project = "latexpy"
-copyright = "2020, peti"
-author = "peti"
+copyright = "2020"
+author = "Tasnádi Gábor"
 
-release = "1"
+release = get_version(0, 0, 0)
 
 extensions = ["sphinx.ext.autodoc"]
 
@@ -19,6 +23,6 @@ html_theme = "classic"
 
 html_static_path = ["_static"]
 
-autodoc_default_options = {"member-order": "bysource", "special-members": True, "private-members": True, "exclude-members": "__weakref__"}
+autodoc_default_options = {"member-order": "bysource", "special-members": True, "private-members": True, "exclude-members": "__weakref__,__dict__"}
 latex_elements = {"extraclassoptions": "openany,oneside"}
 html_theme_options = {"relbarbgcolor": "black"}
