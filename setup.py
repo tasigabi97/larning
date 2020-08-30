@@ -5,7 +5,7 @@ from larning.setup import get_version, get_github_url, PACKAGE_NAME, PACKAGES, s
 # ˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇˇ
 require_interpreter_version(3, 6, 0)
 version = get_version(0, 0, 0)
-INSTALL_REQUIRES = ["twine", "pydantic", "sphinx", "setuptools", "black", "pytest", "wheel"]
+INSTALL_REQUIRES = ["twine", "pydantic", "termcolor", "sphinx", "setuptools", "black", "pytest", "wheel"]
 AUTHOR = "Tasnádi Gábor"
 EMAIL = "tasi.gabi97@gmail.com"
 URL = get_github_url("tasigabi97")

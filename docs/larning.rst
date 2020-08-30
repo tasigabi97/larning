@@ -6,6 +6,15 @@ larning package
    :undoc-members:
    :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   larning.null
+   larning.output
+
 Submodules
 ----------
 

@@ -1,4 +1,4 @@
-from larning.testing import name, input_manager, argv_manager
+from larning.testing import name, input_manager, argv_manager, assert_in
 from larning.ci import InputVariable, Task, Script, ProcTask, ci_manager
 from pytest import raises
 from pydantic import ValidationError
@@ -115,7 +115,8 @@ def _():
 
 @name(Script.__str__, 1, globals())
 def _():
-    assert "name:\n\t\t1-><lambda>()\n\t\t2-><lambda>()" == str(Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name"))
+    tested = str(Script(Task(lambda: 1, name="1"), Task(lambda: 2, name="2"), name="name"))
+    assert_in(tested, "name", "1", "2", "\n", "<lambda>()")
 
 
 @name(Script.__call__, 1, globals())

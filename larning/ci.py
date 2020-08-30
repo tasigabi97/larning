@@ -9,13 +9,16 @@ from pydantic import validate_arguments
 from abc import ABCMeta
 from larning.metaclass import CollectorType
 from larning.os import Proc
-from typing import Union
+from typing import Union, Sequence
 from larning.strings import func_to_str, concatenate_with_separation
 from contextlib import contextmanager
 from sys import argv
-from shutil import rmtree
+from shutil import rmtree, copytree, ignore_patterns
 from os.path import isdir, exists
 from os import mkdir
+from larning.testing import input_manager
+from larning.null import null_manager
+from larning.output import HLINE, var, red, blue, green, between
 
 AbstractCollectorMetaclass = type("AbstractCollectorMetaclass", (CollectorType, ABCMeta), {})
 
@@ -113,8 +116,15 @@ class ProcTask(Task):
 class Script(
     Namable, Printable, aCallable, Iterable, metaclass=AbstractCollectorMetaclass,
 ):
-    def __init__(self, *tasks: Task, name: Union[str, None] = None):
-        self._tasks, self._name = tasks, name
+    def __init__(self, *args: Union[Task, Sequence[Union[str, Task]]], name: Union[str, None] = None):
+        self._tasks, self._inputs, self._name = [], [], name
+        for arg in args:
+            if isinstance(arg, Task):
+                self._tasks.append(arg), self._inputs.append(None)
+            elif isinstance(arg, Sequence):
+                self._tasks.append(arg[1]), self._inputs.append(arg[0])
+            else:
+                raise TypeError(f"want {Union[Task, Sequence[str, Task]]}")
 
     def __iter__(self):
         return iter(self._tasks)
@@ -125,16 +135,44 @@ class Script(
 
     def __str__(self):
         sep = "\n\t\t"
-        return self.name + ":" + sep + concatenate_with_separation([str(task) for task in self._tasks], sep)
+        return red(self.name) + ":" + sep + concatenate_with_separation([str(task) for task in self._tasks], sep)
 
     def __call__(self):
         ret = []
-        print(f"Script |{self.name}| is running:")
-        for task in self._tasks:
-            if input(f"Press Enter to run |{str(task)}| or s to skip actual task...") == "s":
-                continue
-            t = task()
-            print(task.name + "==" + str(t)), ret.append(t)
+        print(f"Script {red(self.name)} is running:")
+        i = 0
+
+        def run():
+            nonlocal i
+            t = self._tasks[i]()
+            print(self._tasks[i].name + "==" + str(t)), ret.append(t)
+            i += 1
+
+        while i < len(self._tasks):
+            with between():
+                if self._inputs[i] is None:
+                    print(f"Press {red('Enter')} to run {green(self._tasks[i])}.")
+                    print(f"Or {red('S')} to skip actual task ...")
+                    if i > 0:
+                        print(f"Or {red('P')} to run previous task {blue(self._tasks[i-1].name)}.")
+                    if i > 1:
+                        print(f"Or {red('PP')} to run before previous task {blue(self._tasks[i-2].name)}.")
+                    inp = input()
+                    if inp == "s":
+                        i += 1
+                        continue
+                    if inp == "p" and i > 0:
+                        i -= 1
+                        print(HLINE)
+                        continue
+                    if inp == "pp" and i > 1:
+                        i -= 2
+                        print(HLINE)
+                        continue
+                    run()
+                else:
+                    with input_manager(self._inputs[i]):
+                        run()
         return ret
 
     class Factory:
@@ -171,3 +209,11 @@ def mkdirs(*paths):
     for path in paths:
         if not exists(path):
             mkdir(path)
+
+
+def cpdirs(dst: str, paths: Sequence[str], ignores: Sequence[str] = None):
+    rmdirs(dst)
+    ignore = None if ignores is None else ignore_patterns(*ignores)
+    for path in paths:
+        if exists(path):
+            copytree(path, dst, ignore=ignore)

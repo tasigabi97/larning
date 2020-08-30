@@ -3,6 +3,11 @@ from io import StringIO
 import sys
 
 
+def assert_in(tested: str, *strings: str):
+    for s in strings:
+        assert s in tested
+
+
 @contextmanager
 def input_manager(string: str) -> None:
     original_stdin = sys.stdin
