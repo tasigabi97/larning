@@ -3,19 +3,26 @@
 from larning.ci import ci_manager, rmdirs, mkdirs
 from os import getcwd
 from os.path import join
-from larning import __name__ as project_name
+from larning import __name__ as PROJ_NAME
 
 with ci_manager() as (iF, tF, pF, sF):
     WD = getcwd()
-    BUILD, EGG, DIST, DOCS = (
+    BUILD, EGG, DIST, DOCS, PYTEST = (
         join(WD, "build"),
-        join(WD, project_name + ".egg-info"),
+        join(WD, PROJ_NAME + ".egg-info"),
         join(WD, "dist"),
         join(WD, "docs"),
+        join(WD, ".pytest_cache"),
     )
-    tF.delete_temp_dirs = [rmdirs, [BUILD, EGG, DIST]]
+    _BUILD = join(DOCS, "_build")
+    tF.delete_temp_dirs = [rmdirs, [BUILD, EGG, DIST, _BUILD, PYTEST]]
     tF.create_docs_dir = [mkdirs, [DOCS]]
+    pF.install_make = [DOCS, "sudo", "apt", "install", "make"]
     pF.init_docs = [DOCS, "sphinx-quickstart"]
+    pF.apidoc = [WD, "sphinx-apidoc", "-f", "-e", "-M", "-o", "./docs", f"./{PROJ_NAME}"]
+    pF.latexpdf = [WD, "sphinx-build", "-M", "latexpdf", "./docs", f"./docs/_build"]
+    pF.html = [WD, "sphinx-build", "-M", "html", "./docs", f"./docs/_build"]
+
     pF.black = [WD, "black", ".", "-t", "py38", "-l", "160"]
     pF.git_status = [WD, "git", "status"]
     pF.git_add_all = [WD, "git", "add", "."]
@@ -36,13 +43,16 @@ with ci_manager() as (iF, tF, pF, sF):
         "dist/*",
     ]
 
-    sF.init_docs = [tF.create_docs_dir, pF.init_docs]
+    sF.init_docs = [tF.create_docs_dir, pF.init_docs, pF.install_make]
     sF.setup = [pF.setup]
 
     sF.a = [
-        pF.black,
         pF.pytest,
+        pF.black,
         tF.delete_temp_dirs,
+        pF.apidoc,
+        # pF.latexpdf,
+        pF.html,
         pF.git_status,
         pF.git_add_all,
         pF.git_commit,

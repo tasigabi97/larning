@@ -4,6 +4,12 @@ from pytest import raises
 from pydantic import ValidationError
 from sys import argv
 from unittest.mock import MagicMock
+from larning.os import Proc
+
+
+@name(Script, "1_", globals())
+def _():
+    ...
 
 
 def setup_function():
@@ -93,7 +99,9 @@ def _():
 @name(ProcTask.__call__, 1, globals())
 def _():
     with input_manager("a"):
-        assert ProcTask(["echo", "a", InputVariable.Factory().a], {"wd_path": "/home"}, "ProcName",)() == "0->a a\n->"
+        p = Proc()
+        p._exit_code = 0
+        assert ProcTask(["echo", "a", InputVariable.Factory().a], {"wd_path": "/home"}, "ProcName",)() == p.exit_msg
 
 
 @name(ProcTask.Factory.__setattr__, 1, globals())

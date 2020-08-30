@@ -51,8 +51,6 @@ def _():
 def _():
     basic = Proc("echo", 1)()
     shell = Proc("echo", 1, shell=True)()
-    assert basic.stdout == "1\n" == shell.stdout
-    assert basic.stderr == "" == shell.stderr
     assert basic.exit_code == 0 == shell.exit_code
 
 
@@ -70,8 +68,5 @@ def _():
 @name(Proc.__call__, "dirchange", globals())
 def _():
     original_wd = getcwd()
-    assert Proc("pwd", wd_path="/")().stdout == "/\n"
-    assert Proc("pwd", wd_path="/", shell=True)().stdout == "/\n"
-    assert original_wd == getcwd()
-    assert Proc("cd", "..", ";", "pwd", shell=True)().stdout[:-1] == split(getcwd())[0]
+    Proc("cd", "..", ";", "pwd", shell=True)()
     assert original_wd == getcwd()

@@ -94,11 +94,11 @@ def test_name():
     assert globals()["test_basic_func_2"] is not globals()["_"]
     assert globals()["test_basic_func_3"] is globals()["_"]
     assert globals()["test_basic_class_0"] is globals()["_basic_class"]
-    assert globals()["test_basic_class.basic_method_0"] is globals()["_basic_method"]
-    assert globals()["test_basic_class.basic_classmethod_0"] is globals()["_basic_classmethod"]
-    assert globals()["test_basic_class.basic_staticmethod_0"] is globals()["_basic_staticmethod"]
+    assert globals()["test_basic_class_basic_method_0"] is globals()["_basic_method"]
+    assert globals()["test_basic_class_basic_classmethod_0"] is globals()["_basic_classmethod"]
+    assert globals()["test_basic_class_basic_staticmethod_0"] is globals()["_basic_staticmethod"]
     assert globals()["_basic_property_fget"] is not globals()["_basic_property_fset"]
-    assert globals()["_basic_property_fset"] is globals()["test_basic_class.basic_property_1"]
+    assert globals()["_basic_property_fset"] is globals()["test_basic_class_basic_property_1"]
     with raises(ValidationError):
         name(basic_class.basic_property, "0", globals())(basic_func)
     with raises(NameError):

@@ -100,7 +100,7 @@ class ProcTask(Task):
     def __call__(self):
         args, kwargs = InputVariable.convert_InputVariables(self._args, self._kwargs, lambda x: x.value)
         p = Proc(*args, **kwargs)()
-        return concatenate_with_separation([p.exit_code, p.stdout, p.stderr], "->")
+        return p.exit_msg
 
     class Factory:
         def __setattr__(self, name, l: list):

@@ -10,8 +10,11 @@ from larning.property import with_property
 from sys import stdout, stderr
 
 
-@with_property("exit_code", "stdout", "stderr")
 class Proc(Callable):
+    @property
+    def exit_code(self):
+        return self._exit_code
+
     @property
     def _command(self) -> str:
         return concatenate_with_separation(self._args, " ")
@@ -25,21 +28,21 @@ class Proc(Callable):
     def __str__(self) -> str:
         return concatenate_with_separation([self._wd.path, self._command], "$ ")
 
+    @property
+    def exit_msg(self):
+        return f"exit_code=={self.exit_code}"
+
     def __call__(self) -> "Proc":
         args = self._command if self._shell else self._args
         with self._wd:
             p: CompletedProcess = run(
                 args, stdout=stdout, stderr=STDOUT, env=self._env, shell=self._shell,
             )
-            self.stdout, self.stderr, self.exit_code = (
-                "p.stdout.decode()",
-                "p.stderr.decode()",
-                p.returncode,
-            )
+            self._exit_code = p.returncode
             try:
                 p.check_returncode()
             except Exception as e:
-                print(f"exitcode=={self.exit_code}\nstdout=={self.stdout}\nstderr=={self.stderr}")
+                print(self.exit_msg)
                 raise e
         return self
 
